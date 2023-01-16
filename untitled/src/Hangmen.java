@@ -4,8 +4,28 @@ import java.util.*;
 public class Hangmen {
     static Scanner scn = new Scanner(System.in);
 
+    public static void separatorLine(){
+        System.out.printf("-".repeat(80) + "\n");
+    }
+    //returns a String randomly chosen from an ArrayList
+    public static String getRandomWord (ArrayList<String> listOfWords){
+        Random random = new Random();
+        String word = listOfWords.get(random.nextInt(listOfWords.size()));
+        return word;
+    }
+
+    //adds every character of a String to an ArrayList for later use
+    public static ArrayList<Character> wordIntoCharList (String word){
+        ArrayList<Character> wordAsList = new ArrayList<Character>();
+
+        for (char c : word.toCharArray()) {
+            wordAsList.add(c);
+        }
+        return wordAsList;
+    }
+
     //checks if the path exists, and creates a new list containing all words within the given file
-    public static ArrayList wordList (String path) throws IOException {
+    public static ArrayList<String> getWordList (String path) throws IOException {
         ArrayList words = new ArrayList();
         File file = new File(path);
 
@@ -60,12 +80,18 @@ public class Hangmen {
     }
 
     public static void main (String[]args){
-        ArrayList words = null;
+        ArrayList words = new ArrayList();
 
         try {
-            words = wordList(args[0]);
+            words = getWordList(args[0]);
         } catch (IOException e) {}
 
-        validList(words);
+        System.out.println("=".repeat(80));
+        System.out.println("HANGMEN (" + words.size() + " Word(s))");
+        separatorLine();
+
+
+
+
     }
 }
