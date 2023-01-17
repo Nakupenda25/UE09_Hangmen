@@ -179,7 +179,7 @@ public class Hangmen {
         ArrayList<String> words = new ArrayList();
         ArrayList<Character> wordPrint = new ArrayList();
         ArrayList<Character> currentWord = new ArrayList<Character>();
-        HashSet userGuessedChars = new HashSet();
+        TreeSet<Character> userGuessedChars = new TreeSet<>();
         words = getWordList(args[0]);
 
         int errorCounter = 0;
@@ -200,7 +200,7 @@ public class Hangmen {
                 wordPrint.add('_');
             }
 
-            System.out.println(currentWord);
+            System.out.println(currentWord + "\n");
 
             while (true) {
 
@@ -217,19 +217,29 @@ public class Hangmen {
                         if (guessedLetters == currentWord.size())
                             break;
 
+                        drawHangmanLoss(errorCounter);
+
                         System.out.print("Word: ");
                         for (char symbol : wordPrint) {
                             System.out.print(symbol + " ");
                         }
 
                         System.out.println();
-                        System.out.println("Misses (" + errorCounter + "/11)");
+                        System.out.print("Misses (" + errorCounter + "/11):");
+                        System.out.println();
                         System.out.print("Next guess: ");
 
                         char c = charInput();
-                        if (c != 0)
-                        userGuessedChars.add(c);
-
+                        if (c != 0 && !userGuessedChars.contains(c)) {
+                            userGuessedChars.add(c);
+                            if (!currentWord.contains(c)){
+                                errorCounter++;
+                            }
+                        }
+                        else if (userGuessedChars.contains(c)){
+                            System.out.println("Character already guessed!");
+                        }
+                        System.out.println();
 
                     } catch (InputMismatchException e) {}
                 }else
