@@ -119,7 +119,7 @@ public class Hangmen {
                 String word;
 
                 while ((word = inBuffer.readLine()) != null){
-                    words.add(word);
+                    words.add(word.toUpperCase());
                 }
             }else
                 System.out.println("Error: Empty file!");
@@ -130,6 +130,28 @@ public class Hangmen {
 
 
         return words;
+    }
+
+    //prints each element of the given ArrayList
+    public static void wordWithHoles(ArrayList<Character> toPrint){
+        System.out.print("Word: ");
+
+        int counter = 0;
+        for (Character symbol : toPrint) {
+            if (counter == 0) {
+                System.out.print(symbol + " ");
+                counter++;
+            }
+            else if (counter == toPrint.size() - 1)
+                System.out.print(Character.toLowerCase(symbol));
+
+            else {
+                System.out.print(Character.toLowerCase(symbol) + " ");
+                counter++;
+            }
+
+        }
+        System.out.println();
     }
 
     //checks if all elements of the list are valid and returns an error if they don't
@@ -170,6 +192,32 @@ public class Hangmen {
 
     }
 
+    //simple method for cleaner formatting;
+    public static void printMissinputs(ArrayList<Character> missInputs){
+
+        if (missInputs.size() == 0) {
+            System.out.print("Misses (" + missInputs.size() + "/11)");
+            System.out.println();
+            return;
+
+        }else{
+            int counter = 0;
+            System.out.print("Misses (" + missInputs.size() + "/11):");
+            for (Character element : missInputs) {
+                if (counter == missInputs.size() - 1){
+                    System.out.print(" " + element.toString().toUpperCase());
+                    System.out.println();
+                }else {
+                    System.out.print(" " + element.toString().toUpperCase() + ",");
+                    counter++;
+                }
+            }
+        }
+
+
+        System.out.println();
+    }
+
     public static void main (String[]args){
         if (args.length == 0) {
             System.out.println("Error: No file name given!");
@@ -177,12 +225,13 @@ public class Hangmen {
         }
 
         ArrayList<String> words = new ArrayList();
-        ArrayList<Character> wordPrint = new ArrayList();
+        ArrayList<Character> wordPrintList = new ArrayList();
         ArrayList<Character> currentWord = new ArrayList<Character>();
+        ArrayList<Character> missInputs = new ArrayList<>();
         TreeSet<Character> userGuessedChars = new TreeSet<>();
         words = getWordList(args[0]);
 
-        int errorCounter = 0;
+
         int roundCounter = 1;
         int guessedLetters = 0;
 
@@ -197,43 +246,37 @@ public class Hangmen {
             words.remove(temp);
             currentWord = wordIntoCharList(temp);
             for(int underscores = 1; underscores <= currentWord.size(); underscores++){
-                wordPrint.add('_');
+                wordPrintList.add('_');
             }
 
             System.out.println(currentWord + "\n");
 
             while (true) {
 
-                if (errorCounter != 11) {
+                if (missInputs.size() != 11) {
                     try {
                         for (int letternumber = 0; letternumber < currentWord.size(); letternumber++) {
 
-                            if (userGuessedChars.contains(currentWord.get(letternumber)) && wordPrint.get(letternumber) != currentWord.get(letternumber)) {
-                                wordPrint.set(letternumber, currentWord.get(letternumber));
+                            if (userGuessedChars.contains(currentWord.get(letternumber)) && wordPrintList.get(letternumber) != currentWord.get(letternumber)) {
+                                wordPrintList.set(letternumber, currentWord.get(letternumber));
                                 guessedLetters++;
                             }
                         }
 
+                        drawHangmanLoss(missInputs.size());
+                        wordWithHoles(wordPrintList);
+                        printMissinputs(missInputs);
+
                         if (guessedLetters == currentWord.size())
                             break;
 
-                        drawHangmanLoss(errorCounter);
 
-                        System.out.print("Word: ");
-                        for (char symbol : wordPrint) {
-                            System.out.print(symbol + " ");
-                        }
-
-                        System.out.println();
-                        System.out.print("Misses (" + errorCounter + "/11):");
-                        System.out.println();
                         System.out.print("Next guess: ");
-
-                        char c = charInput();
+                        Character c = Character.toUpperCase(charInput());
                         if (c != 0 && !userGuessedChars.contains(c)) {
                             userGuessedChars.add(c);
                             if (!currentWord.contains(c)){
-                                errorCounter++;
+                                missInputs.add(c);
                             }
                         }
                         else if (userGuessedChars.contains(c)){
