@@ -5,8 +5,15 @@ public class Hangmen {
     static Scanner scn = new Scanner(System.in);
     public static final int MAX_MISTAKES = 11;
 
-    public static void separatorLine() {
-        System.out.printf("-".repeat(80) + "\n");
+    public static void separatorLine(Character thickness){
+        switch (thickness){
+            case '-':
+                System.out.printf("-".repeat(80) + "\n");
+                break;
+            case '=':
+                System.out.printf("=".repeat(80) + "\n");
+                break;
+        }
     }
 
     //returns a String randomly chosen from an ArrayList
@@ -109,21 +116,33 @@ public class Hangmen {
         return wordAsList;
     }
 
-    //checks if the path exists, and creates a new list containing all words within the given file
-    public static ArrayList<String> getWordList(String path) {
-        ArrayList words = new ArrayList();
+    public static boolean pathChecker (String path){
         File file = new File(path);
 
-        try {
-            if (file.exists() && file.length() != 0) {
-                BufferedReader inBuffer = new BufferedReader(new FileReader(path));
+        if (file.exists()){
+            if (!file.canRead()) {
+                System.out.println("Could not read file!");
+                return false;
+            }else if (file.length() == 0) {
+                System.out.println("Empty file!");
+                return false;
+            }else
+                return true;
+        }else
+            System.out.println("File not found");
+            return false;
+    }
+
+    //checks if the path exists, and creates a new list containing all words within the given file
+    public static ArrayList<String> getWordList(String path) {
+        ArrayList<String> words = new ArrayList<>();
+
+        try (BufferedReader inBuffer = new BufferedReader(new FileReader(path))){
                 String word;
 
                 while ((word = inBuffer.readLine()) != null) {
                     words.add(word.toUpperCase());
                 }
-            } else
-                System.out.println("Error: Empty file!");
 
         } catch (IOException e) {
             System.out.println("Error: Could not read file!");
@@ -167,23 +186,8 @@ public class Hangmen {
         System.out.println();
     }
 
-    //checks if all elements of the list are valid and returns an error if they don't
-    public static boolean validList(ArrayList<String> words) {
-
-        //.matches uses regex to check if the String only follows a valid pattern
-        for (String s : words) {
-
-            if (words.isEmpty() || s.matches(" "))
-                if (!s.matches("[a-zA-Z]+")) {
-                    System.out.println("Error: Corrupt file!");
-                    return false;
-                }
-        }
-        return true;
-    }
-
     //method for the character input of the user // resets if more than one character is provided
-    public static char charInput() throws InputMismatchException {
+    public static char charInput(){
         char ch = 0;
 
         String inputChar = scn.nextLine();
@@ -201,29 +205,24 @@ public class Hangmen {
     }
 
     //simple method for cleaner formatting;
-    public static void printMissinputs(ArrayList<Character> missInputs) {
+    public static void printMissinputs(HashSet<Character> missInputs) {
 
         if (missInputs.size() == 0) {
-            System.out.print("Misses (" + missInputs.size() + "/11)");
-            System.out.println();
-            return;
+            System.out.println("Misses (" + missInputs.size() + "/11)");
 
         } else {
             int counter = 0;
             System.out.print("Misses (" + missInputs.size() + "/11):");
             for (Character element : missInputs) {
                 if (counter == missInputs.size() - 1) {
-                    System.out.print(" " + element.toString().toUpperCase());
-                    System.out.println();
-                } else {
+                    System.out.println(" " + element.toString().toUpperCase());
+                }else {
                     System.out.print(" " + element.toString().toUpperCase() + ",");
                     counter++;
                 }
             }
         }
 
-
-        System.out.println();
     }
 
     public static void main(String[] args) {
@@ -232,18 +231,19 @@ public class Hangmen {
             return;
         }
 
-        ArrayList<String> words = new ArrayList();
+        ArrayList<String> words = new ArrayList<String>();
         //list that is just used for printing
-        ArrayList<Character> wordPrintList = new ArrayList();
-        ArrayList<Character> currentWord = new ArrayList<Character>();
-        ArrayList<Character> missInputs = new ArrayList<>();
+        ArrayList<Character> wordPrintList = new ArrayList<>();
+        ArrayList<Character> currentWord = new ArrayList<>();
+        HashSet<Character> missInputs = new HashSet<>();
         HashSet<Character> userGuessedChars = new HashSet<>();
         words = getWordList(args[0]);
         final int ROUND_NUMBER = words.size();
+        int roundsWon = 0;
 
-        System.out.println("=".repeat(80));
+        separatorLine('=');
         System.out.println("HANGMEN (" + words.size() + " Word(s))");
-        separatorLine();
+        separatorLine('-');
 
         for (int round = 1; round <= ROUND_NUMBER; round++) {
 
@@ -290,15 +290,23 @@ public class Hangmen {
 
             }
             if (missInputs.size() == MAX_MISTAKES)
-                System.out.println("YOU LOSE!\n");
+                System.out.println("\nYOU LOSE!");
+            else {
+                System.out.println("\nYOU WIN!");
+                roundsWon++;
+            }
+
+            if (round == ROUND_NUMBER)
+                separatorLine('=');
             else
-                System.out.println("YOU WIN!\n");
+                separatorLine('-');
 
             userGuessedChars.clear();
             missInputs.clear();
             wordPrintList.clear();
         }
         scn.close();
+        System.out.printf("WINS: %d/%d\n", roundsWon, ROUND_NUMBER);
         System.out.println("GOODBYE!!!");
     }
 }
