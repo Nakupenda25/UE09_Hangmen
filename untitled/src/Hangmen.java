@@ -116,21 +116,31 @@ public class Hangmen {
         return wordAsList;
     }
 
+
+    //all in one method that returns true if a path exists, is readable and not empty. Spits out an error otherwise
     public static boolean pathChecker (String path){
         File file = new File(path);
 
-        if (file.exists()){
-            if (!file.canRead()) {
-                System.out.println("Could not read file!");
-                return false;
-            }else if (file.length() == 0) {
-                System.out.println("Empty file!");
-                return false;
-            }else
-                return true;
-        }else
-            System.out.println("File not found");
+        if (!file.exists()){
+            System.out.println("Error: File not found!");
             return false;
+        }
+
+        try (BufferedReader buffer = new BufferedReader(new FileReader(path))){
+            String tester;
+
+            if (!file.canRead()) {
+                System.out.println("Error: Could not read file!");
+                return false;
+            }else if ((tester = buffer.readLine()) == null || tester.isBlank()){
+                System.out.println("Error: Empty file!");
+                return false;
+            }
+
+        }catch (IOException e){}
+
+        return true;
+
     }
 
     //checks if the path exists, and creates a new list containing all words within the given file
@@ -141,19 +151,22 @@ public class Hangmen {
                 String word;
 
                 while ((word = inBuffer.readLine()) != null) {
-                    words.add(word.toUpperCase());
+                    if (word.matches("[a-zA-Z]*"))
+                        words.add(word.toUpperCase());
+                    else {
+                        System.out.println("Error: Corrupt file!");
+                        words.clear();
+                        break;
+                    }
                 }
 
-        } catch (IOException e) {
-            System.out.println("Error: Could not read file!");
-        }
-
+        } catch (IOException e) {}
 
         return words;
     }
 
     //goes through each element of an arraylist
-    public static ArrayList<Character> setGuessedChars(ArrayList<Character> printList, ArrayList<Character> currentWord, HashSet userGuessedChars){
+    public static ArrayList<Character>  setGuessedChars(ArrayList<Character> printList, ArrayList<Character> currentWord, HashSet userGuessedChars){
 
         for (int letternumber = 0; letternumber < currentWord.size(); letternumber++) {
 
@@ -192,14 +205,14 @@ public class Hangmen {
 
         String inputChar = scn.nextLine();
         if (inputChar.length() != 1) {
-            System.out.println("Invalid Input!");
+            System.out.println("\nInvalid input!");
             return ch;
         }
 
         if (inputChar.matches("[a-zA-Z]")) {
             ch = inputChar.charAt(0);
         } else
-            System.out.println("Invalid Character!");
+            System.out.println("\nInvalid character!");
 
         return ch;
     }
@@ -237,7 +250,14 @@ public class Hangmen {
         ArrayList<Character> currentWord = new ArrayList<>();
         HashSet<Character> missInputs = new HashSet<>();
         HashSet<Character> userGuessedChars = new HashSet<>();
-        words = getWordList(args[0]);
+        if (pathChecker(args[0])) {
+            words = getWordList(args[0]);
+            if (words.size() == 0)
+                return;
+        }else
+            return;
+
+
         final int ROUND_NUMBER = words.size();
         int roundsWon = 0;
 
@@ -255,7 +275,7 @@ public class Hangmen {
             //turn the word into a character-list for later use
             currentWord = wordIntoCharList(temp);
 
-            System.out.printf("Word #" + round + ": \n\n");
+            System.out.println("Word #" + round + ":\n");
 
             //fills the print list with underscores depending on how long the word this round is
             for (int underscores = 1; underscores <= currentWord.size(); underscores++) {
@@ -268,13 +288,12 @@ public class Hangmen {
 
                 drawHangmanLoss(missInputs.size());
                 wordWithHoles(wordPrintList);
+                printMissinputs(missInputs);
 
                 if (userGuessedChars.containsAll(currentWord))
                     break;
                 else if (missInputs.size() == MAX_MISTAKES)
                     break;
-
-                printMissinputs(missInputs);
 
                 System.out.print("Next guess: ");
                 Character c = Character.toUpperCase(charInput());
@@ -286,6 +305,7 @@ public class Hangmen {
                 } else if (userGuessedChars.contains(c)) {
                     System.out.println("Character already guessed!");
                 }
+                System.out.println();
                 System.out.println();
 
             }
@@ -307,6 +327,5 @@ public class Hangmen {
         }
         scn.close();
         System.out.printf("WINS: %d/%d\n", roundsWon, ROUND_NUMBER);
-        System.out.println("GOODBYE!!!");
     }
 }
