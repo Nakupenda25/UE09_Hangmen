@@ -1,3 +1,10 @@
+/*
+ * Hangmen
+ * Reads words from a seperate file and uses them for a game of hangman
+ * Author: Benedikt Schmatz
+ * Last Change: 30.01.23
+ */
+
 import java.io.*;
 import java.util.*;
 
