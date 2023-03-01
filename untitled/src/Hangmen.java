@@ -161,7 +161,7 @@ public class Hangmen {
         //only returns true if all validations are met
         return true;
     }
-
+    //git test intellij
     //checks if the path exists, and creates a new list containing all words within the given file
     public static ArrayList<String> getWordList(String path) {
         ArrayList<String> words = new ArrayList<>();
@@ -171,7 +171,7 @@ public class Hangmen {
 
                 //goes through each line of the file and checks if it matches the regex. If it does, adds the word to the wordList for this game
                 while ((word = inBuffer.readLine()) != null) {
-                    if (word.matches("[a-zA-Z]*"))
+                    if (word.matches("[a-zA-Z]+"))
                         words.add(word.toUpperCase());
                     else {
                         System.out.println("Error: Corrupt file!");
